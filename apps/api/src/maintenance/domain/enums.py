@@ -1,0 +1,79 @@
+"""Domain Enumerations for Maintenance & Work Order Management."""
+
+from enum import StrEnum
+
+
+class WorkOrderSource(StrEnum):
+    COMPLAINT = "COMPLAINT"
+    SERVICE_REQUEST = "SERVICE_REQUEST"
+    ADMIN = "ADMIN"
+    INSPECTION = "INSPECTION"
+    EMERGENCY = "EMERGENCY"
+    PREVENTIVE = "PREVENTIVE"
+
+
+class WorkOrderPriority(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+class WorkOrderStatus(StrEnum):
+    DRAFT = "DRAFT"
+    OPEN = "OPEN"
+    ASSIGNED = "ASSIGNED"
+    SCHEDULED = "SCHEDULED"
+    IN_PROGRESS = "IN_PROGRESS"
+    ON_HOLD = "ON_HOLD"
+    WAITING_FOR_PARTS = "WAITING_FOR_PARTS"
+    WAITING_FOR_RESIDENT = "WAITING_FOR_RESIDENT"
+    COMPLETED = "COMPLETED"
+    VERIFIED = "VERIFIED"
+    CLOSED = "CLOSED"
+    REOPENED = "REOPENED"
+    CANCELLED = "CANCELLED"
+
+
+class WorkOrderAssignmentType(StrEnum):
+    INTERNAL_USER = "INTERNAL_USER"
+    TEAM = "TEAM"
+    STAFF = "STAFF"
+    VENDOR = "VENDOR"
+
+
+class WorkOrderCommentType(StrEnum):
+    PUBLIC = "PUBLIC"
+    INTERNAL = "INTERNAL"
+
+
+class WorkOrderFileType(StrEnum):
+    PHOTO = "PHOTO"
+    VIDEO = "VIDEO"
+    AUDIO = "AUDIO"
+    DOCUMENT = "DOCUMENT"
+    OTHER = "OTHER"
+
+
+class WorkOrderResolutionStatus(StrEnum):
+    PENDING_VERIFICATION = "PENDING_VERIFICATION"
+    VERIFIED = "VERIFIED"
+    REJECTED = "REJECTED"
+
+
+class WorkOrderActivityType(StrEnum):
+    CREATED = "CREATED"
+    ASSIGNED = "ASSIGNED"
+    REASSIGNED = "REASSIGNED"
+    PRIORITY_CHANGED = "PRIORITY_CHANGED"
+    STATUS_CHANGED = "STATUS_CHANGED"
+    COMMENT_ADDED = "COMMENT_ADDED"
+    ATTACHMENT_ADDED = "ATTACHMENT_ADDED"
+    SCHEDULED = "SCHEDULED"
+    STARTED = "STARTED"
+    PART_ADDED = "PART_ADDED"
+    COMPLETED = "COMPLETED"
+    VERIFIED = "VERIFIED"
+    REOPENED = "REOPENED"
+    ESCALATED = "ESCALATED"
+    CANCELLED = "CANCELLED"

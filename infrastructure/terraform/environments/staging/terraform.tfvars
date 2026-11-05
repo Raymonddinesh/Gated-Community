@@ -1,0 +1,6 @@
+aws_region         = "ap-south-1"
+environment        = "staging"
+vpc_cidr           = "10.30.0.0/16"
+rds_instance_class = "db.m6g.large"
+redis_node_type    = "cache.m6g.large"
+mq_instance_type   = "mq.m5.large"

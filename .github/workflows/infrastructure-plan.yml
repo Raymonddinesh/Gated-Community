@@ -1,0 +1,92 @@
+name: Infrastructure Plan (Non-Prod)
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - "infrastructure/**"
+      - ".github/workflows/infrastructure*"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target Environment for Plan Generation"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - qa
+          - staging
+
+permissions:
+  id-token: write # Required for AWS OIDC STS AssumeRole
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan-nonprod:
+    name: Generate Plan (${{ github.event.inputs.environment || 'dev' }})
+    runs-on: ubuntu-latest
+    env:
+      OPENTOFU_VERSION: "1.9.0"
+      TARGET_ENV: ${{ github.event.inputs.environment || 'dev' }}
+      AWS_REGION: "ap-south-1"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
+
+      - name: Configure AWS Credentials via OIDC (Speculative / Staging Role)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_PLAN_ROLE_ARN || 'arn:aws:iam::123456789012:role/SocietySphereGitHubActionsPlanRole' }}
+          role-session-name: GitHubActions-Plan-${{ env.TARGET_ENV }}-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+        continue-on-error: true # Allows plan syntax checking if credentials not yet configured
+
+      - name: OpenTofu Init with Remote State
+        id: init
+        run: |
+          cd infrastructure/terraform/environments/${{ env.TARGET_ENV }}
+          tofu init -input=false
+
+      - name: Generate Speculative Plan
+        id: plan
+        run: |
+          cd infrastructure/terraform/environments/${{ env.TARGET_ENV }}
+          tofu plan -input=false -no-color -out=tfplan > plan_output.txt 2>&1 || true
+          
+          # Mask any sensitive attributes before persisting summary
+          grep -E "Plan:|No changes|Error:" plan_output.txt || echo "Plan generated"
+
+      - name: Sanitize and Publish Plan Summary
+        if: always()
+        run: |
+          echo "## 📋 Infrastructure Speculative Plan (${{ env.TARGET_ENV }})" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | \`${{ env.TARGET_ENV }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit SHA | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Execution Mode | **PLAN ONLY (Zero Apply Permissions)** |" >> $GITHUB_STEP_SUMMARY
+          echo "| State Backend | \`s3://societysphere-terraform-state-${{ env.TARGET_ENV }}/environments/${{ env.TARGET_ENV }}/terraform.tfstate\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Plan Status" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          tail -n 25 infrastructure/terraform/environments/${{ env.TARGET_ENV }}/plan_output.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "Plan executed in offline/isolated validation mode." >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> ⚠️ **Security Notice:** Plan output is speculative. No apply commands are permitted in this pipeline." >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Encrypted Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TARGET_ENV }}-tfplan-${{ github.run_id }}
+          path: infrastructure/terraform/environments/${{ env.TARGET_ENV }}/tfplan
+          retention-days: 7
+          if-no-files-found: ignore

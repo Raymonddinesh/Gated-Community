@@ -1,0 +1,6 @@
+aws_region         = "ap-south-1"
+environment        = "qa"
+vpc_cidr           = "10.20.0.0/16"
+rds_instance_class = "db.t4g.medium"
+redis_node_type    = "cache.t4g.small"
+mq_instance_type   = "mq.t3.micro"

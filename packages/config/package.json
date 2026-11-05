@@ -1,0 +1,6 @@
+{
+  "name": "@societysphere/config",
+  "version": "0.1.0",
+  "description": "Shared linting, formatting, and TypeScript configurations",
+  "private": true
+}

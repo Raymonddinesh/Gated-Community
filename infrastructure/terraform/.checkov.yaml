@@ -1,0 +1,30 @@
+# ==============================================================================
+# Checkov Static Analysis Policy Configuration for SocietySphere
+# ==============================================================================
+
+framework:
+  - terraform
+
+skip-check:
+  # CKV_AWS_144: S3 Cross-Region Replication is disabled to ensure 100% compliance
+  # with Indian Digital Personal Data Protection (DPDP) Act 2023 data residency mandates.
+  # All customer and accounting data must strictly reside within AWS ap-south-1 (Mumbai).
+  - CKV_AWS_144
+
+  # CKV_AWS_260: ALB requires port 80 ingress to serve 301 redirects to HTTPS (port 443).
+  - CKV_AWS_260
+
+  # CKV2_AWS_5: Security groups are modularly decoupled and attached dynamically
+  # across ECS tasks and RDS/ElastiCache instances.
+  - CKV2_AWS_5
+
+  # CKV_AWS_18: S3 server access logs are centralized into a dedicated Security
+  # Account audit logging bucket rather than intra-bucket logging.
+  - CKV_AWS_18
+
+  # CKV2_AWS_62: S3 event notifications are not required for static document archiving.
+  - CKV2_AWS_62
+
+compact: true
+quiet: true
+soft-fail: false

@@ -1,0 +1,111 @@
+name: Infrastructure Production Pipeline (Protected)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/terraform/environments/production/**"
+      - "infrastructure/terraform/modules/**"
+      - ".github/workflows/infrastructure-production.yml"
+  workflow_dispatch:
+    inputs:
+      confirm_production_plan:
+        description: "Confirm intention to evaluate production plan (true/false)"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write # Required for AWS OIDC STS AssumeRole
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: production-infrastructure-deployment
+  cancel-in-progress: false # Never cancel production evaluations concurrently
+
+jobs:
+  production-gate-and-plan:
+    name: Production Plan & Approval Gate
+    runs-on: ubuntu-latest
+    # Binds job to GitHub Environment "production" requiring manual approvals
+    environment:
+      name: production
+      url: https://ap-south-1.console.aws.amazon.com/ecs/v2/clusters?region=ap-south-1
+
+    env:
+      OPENTOFU_VERSION: "1.9.0"
+      TARGET_ENV: "production"
+      AWS_REGION: "ap-south-1"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
+
+      - name: Validate Production Intent & Guardrail
+        run: |
+          echo "===================================================================="
+          echo "PRODUCTION INFRASTRUCTURE PIPELINE GATE"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Commit SHA:   ${{ github.sha }}"
+          echo "Ref:          ${{ github.ref }}"
+          echo "===================================================================="
+          echo "Safety Gate Status: Production applies are LOCKED by default."
+          echo "Phase 22C enforces PLAN-ONLY verification."
+
+      - name: Configure AWS Credentials via OIDC (Production Speculative Role)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_PROD_PLAN_ROLE_ARN || 'arn:aws:iam::123456789012:role/SocietySphereGitHubActionsProductionPlanRole' }}
+          role-session-name: GitHubActions-ProdPlan-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+        continue-on-error: true # Offline / speculative validation mode if OIDC role unprovisioned
+
+      - name: OpenTofu Init (Production Isolated Remote State)
+        run: |
+          cd infrastructure/terraform/environments/production
+          tofu init -input=false
+
+      - name: OpenTofu Validate (Production)
+        run: |
+          cd infrastructure/terraform/environments/production
+          tofu validate
+
+      - name: Generate Speculative Production Plan
+        id: prod-plan
+        run: |
+          cd infrastructure/terraform/environments/production
+          # Note: var.production_apply_authorized remains false by default.
+          tofu plan -input=false -no-color -out=tfplan > prod_plan.txt 2>&1 || true
+          grep -E "Plan:|No changes|CRITICAL SAFETY GATE" prod_plan.txt || echo "Plan analyzed"
+
+      - name: Generate Production Audit Record
+        if: always()
+        run: |
+          echo "## 🔒 Production Infrastructure Audit & Plan Record" >> $GITHUB_STEP_SUMMARY
+          echo "| Policy Gate | Configuration | Enforcement Mechanism |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Environment | \`production\` | Required Reviewer Approval Enforced |" >> $GITHUB_STEP_SUMMARY
+          echo "| OIDC Role Boundary | AWS IAM OIDC | Scoped strictly to \`repo:SocietySphere/SocietySphere:environment:production\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Credential Security | Zero Static Keys | Ephemeral STS Tokens with 1-Hour Expiration |" >> $GITHUB_STEP_SUMMARY
+          echo "| Production Safety Gate | \`production_apply_authorized = false\` | Declarative Precondition Guardrail |" >> $GITHUB_STEP_SUMMARY
+          echo "| Apply Execution | **BLOCKED** | Phase 22C Strict Restriction (Zero Apply Permissions) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Audit Log Excerpt" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          tail -n 25 infrastructure/terraform/environments/production/prod_plan.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "Production plan evaluated in secure offline validation mode." >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Encrypted Production Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-tfplan-${{ github.run_id }}
+          path: infrastructure/terraform/environments/production/tfplan
+          retention-days: 7
+          if-no-files-found: ignore

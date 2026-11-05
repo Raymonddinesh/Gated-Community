@@ -1,0 +1,136 @@
+"""Phase 18 Governance Enums."""
+
+from enum import StrEnum
+
+
+class CommitteeType(StrEnum):
+    MANAGING_COMMITTEE = "MANAGING_COMMITTEE"
+    SUB_COMMITTEE = "SUB_COMMITTEE"
+    AD_HOC = "AD_HOC"
+    OTHER = "OTHER"
+
+
+class CommitteeStatus(StrEnum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    EXPIRED = "EXPIRED"
+    ARCHIVED = "ARCHIVED"
+
+
+class CommitteePosition(StrEnum):
+    PRESIDENT = "PRESIDENT"
+    VICE_PRESIDENT = "VICE_PRESIDENT"
+    SECRETARY = "SECRETARY"
+    JOINT_SECRETARY = "JOINT_SECRETARY"
+    TREASURER = "TREASURER"
+    JOINT_TREASURER = "JOINT_TREASURER"
+    COMMITTEE_MEMBER = "COMMITTEE_MEMBER"
+    SPECIAL_ROLE = "SPECIAL_ROLE"
+    MEMBER = "COMMITTEE_MEMBER"
+
+
+# CommitteeRole alias for compatibility
+CommitteeRole = CommitteePosition
+
+
+class MeetingType(StrEnum):
+    EC_MEETING = "EC_MEETING"
+    COMMITTEE_MEETING = "COMMITTEE_MEETING"
+    MANAGING_COMMITTEE = "COMMITTEE_MEETING"
+    AGM = "AGM"
+    ANNUAL_GENERAL_MEETING = "AGM"
+    EGM = "EGM"
+    SPECIAL_MEETING = "SPECIAL_MEETING"
+    SPECIAL_GENERAL_MEETING = "SPECIAL_MEETING"
+    GENERAL_BODY_MEETING = "AGM"
+    OTHER = "OTHER"
+
+
+class MeetingStatus(StrEnum):
+    DRAFT = "DRAFT"
+    SCHEDULED = "SCHEDULED"
+    NOTICE_PUBLISHED = "NOTICE_PUBLISHED"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+    ADJOURNED = "ADJOURNED"
+
+
+class AgendaItemStatus(StrEnum):
+    PENDING = "PENDING"
+    IN_DISCUSSION = "IN_DISCUSSION"
+    RESOLVED = "RESOLVED"
+    DEFERRED = "DEFERRED"
+
+
+class MeetingAttendanceStatus(StrEnum):
+    PRESENT = "PRESENT"
+    ABSENT = "ABSENT"
+    EXCUSED = "EXCUSED"
+    LATE = "LATE"
+
+
+class QuorumStatus(StrEnum):
+    ACHIEVED = "ACHIEVED"
+    NOT_ACHIEVED = "NOT_ACHIEVED"
+
+
+class ResolutionType(StrEnum):
+    ORDINARY = "ORDINARY"
+    SPECIAL = "SPECIAL"
+    FINANCIAL_APPROVAL = "FINANCIAL_APPROVAL"
+    POLICY = "POLICY"
+    OTHER = "OTHER"
+
+
+class VotingRule(StrEnum):
+    SIMPLE_MAJORITY = "SIMPLE_MAJORITY"
+    TWO_THIRDS = "TWO_THIRDS"
+    UNANIMOUS = "UNANIMOUS"
+    CUSTOM = "CUSTOM"
+
+
+# VotingType alias
+VotingType = VotingRule
+
+
+class ResolutionStatus(StrEnum):
+    DRAFT = "DRAFT"
+    PROPOSED = "PROPOSED"
+    UNDER_DISCUSSION = "UNDER_DISCUSSION"
+    VOTING = "VOTING"
+    VOTING_OPEN = "VOTING"
+    APPROVED = "APPROVED"
+    PASSED = "APPROVED"
+    REJECTED = "REJECTED"
+    WITHDRAWN = "WITHDRAWN"
+    RECORDED = "RECORDED"
+    PUBLISHED = "PUBLISHED"
+
+
+class VoteValue(StrEnum):
+    FOR = "FOR"
+    AGAINST = "AGAINST"
+    ABSTAIN = "ABSTAIN"
+
+
+# VoteChoice alias
+VoteChoice = VoteValue
+
+
+class MinutesStatus(StrEnum):
+    DRAFT = "DRAFT"
+    PREPARED = "PREPARED"
+    SUBMITTED_FOR_APPROVAL = "SUBMITTED_FOR_APPROVAL"
+    APPROVED = "APPROVED"
+    PUBLISHED = "PUBLISHED"
+
+
+class ActionItemStatus(StrEnum):
+    OPEN = "OPEN"
+    PENDING = "OPEN"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    OVERDUE = "OVERDUE"
+    CANCELLED = "CANCELLED"

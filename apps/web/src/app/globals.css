@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-base: 16px;
+  --focus-ring-color: #2563eb;
+}
+
+/* Base Body Typography and Color */
+body {
+  font-size: var(--font-base);
+  color: #1f2937;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Accessible Global Focus States */
+:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+/* ========================================================
+   Experience Modes Foundation
+   ======================================================== */
+
+/* 1. Easy Mode: High Contrast & Large Typography for Elderly / Low Literacy */
+body[data-mode="easy"], .mode-easy {
+  --font-base: 18px;
+  --focus-ring-color: #000000;
+  background-color: #ffffff;
+  color: #000000;
+  line-height: 1.7;
+}
+
+body[data-mode="easy"] button,
+body[data-mode="easy"] a,
+body[data-mode="easy"] input,
+body[data-mode="easy"] select {
+  min-height: 48px;
+  font-size: 1.125rem;
+  border-width: 2px;
+  border-color: #000000;
+}
+
+/* 2. Admin / Professional Mode: Information-Dense Layouts */
+body[data-mode="admin"], .mode-admin {
+  --font-base: 14px;
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* 3. Standard Mode (Default) */
+body[data-mode="standard"], .mode-standard {
+  --font-base: 16px;
+}

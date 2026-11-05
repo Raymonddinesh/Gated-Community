@@ -1,0 +1,7 @@
+{
+  "name": "@societysphere/shared",
+  "version": "0.1.0",
+  "description": "Shared domain interfaces, constants, and validation schemas",
+  "main": "index.js",
+  "private": true
+}

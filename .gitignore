@@ -1,0 +1,118 @@
+# ==============================================================================
+# SocietySphere Root .gitignore
+# Comprehensive exclusion of sensitive data, virtual environments, binaries,
+# build artifacts, test outputs, and Terraform runtime files.
+# ==============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+
+# Node & Next.js
+node_modules/
+.next/
+out/
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.turbo/
+.vercel/
+
+# Environment & Secrets (Never commit secrets!)
+.env
+.env.*
+*.env
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+.aws/
+*credentials
+*credentials.json
+
+# Terraform & OpenTofu
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+# Preserve provider dependency locks
+!*.terraform.lock.hcl
+
+# Database, Data & Docker Volumes
+*.sqlite3
+*.db
+pgdata/
+redisdata/
+rabbitmqdata/
+miniodata/
+docker-compose.override.yml
+
+# Logs & Observability
+logs/
+*.log
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test & Coverage
+.coverage
+htmlcov/
+coverage/
+.coverage.*
+test-reports/
+
+# Temporary files
+tmp/
+temp/
+scratch/
